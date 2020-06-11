@@ -29,23 +29,20 @@ LEFT = 'left'
 RIGHT = 'right'
 
 
+pygame.init()
+FPSCLOCK = pygame.time.Clock()
+DISPLAYSURF = pygame.display.set_mode((WINDOWWIDTH, WINDOWHEIGHT))
+pygame.display.set_caption('Пятнашки')
+BASICFONT = pygame.font.Font('freesansbold.ttf', BASICFONTSIZE)
+
+
 def main():
-    global FPSCLOCK, DISPLAYSURF, BASICFONT, RESET_SURF, RESET_RECT, NEW_SURF, NEW_RECT, SOLVE_SURF, SOLVE_RECT, \
-        boardwidth, boardheight, xmargin, ymargin
-    pygame.init()
-    FPSCLOCK = pygame.time.Clock()
-    DISPLAYSURF = pygame.display.set_mode((WINDOWWIDTH, WINDOWHEIGHT))
-    pygame.display.set_caption('Пятнашки')
-    BASICFONT = pygame.font.Font('freesansbold.ttf', BASICFONTSIZE)
     TITLE, TITLE_R = makeText('Всеми любимые пятнашки', TEXTCOLOR, TILECOLOR, WINDOWWIDTH - 500, WINDOWHEIGHT - 500)
     exit_s, exit_r = makeText('Выход', TEXTCOLOR, TILECOLOR, WINDOWWIDTH - 400, WINDOWHEIGHT - 260)
     LEVEL_1, LEVEL_11 = makeText('1 уровень', TEXTCOLOR, TILECOLOR, WINDOWWIDTH - 420, WINDOWHEIGHT - 450)
     LEVEL_2, LEVEL_22 = makeText('2 уровень', TEXTCOLOR, TILECOLOR, WINDOWWIDTH - 420, WINDOWHEIGHT - 410)
     LEVEL_3, LEVEL_33 = makeText('3 уровень', TEXTCOLOR, TILECOLOR, WINDOWWIDTH - 420, WINDOWHEIGHT - 370)
     LEVEL_4, LEVEL_44 = makeText('4 уровень', TEXTCOLOR, TILECOLOR, WINDOWWIDTH - 420, WINDOWHEIGHT - 330)
-    RESET_SURF, RESET_RECT = makeText('Сброс', TEXTCOLOR, TILECOLOR, WINDOWWIDTH - 120, WINDOWHEIGHT - 90)
-    NEW_SURF, NEW_RECT = makeText('Новая игра', TEXTCOLOR, TILECOLOR, WINDOWWIDTH - 120, WINDOWHEIGHT - 60)
-    SOLVE_SURF, SOLVE_RECT = makeText('Решение', TEXTCOLOR, TILECOLOR, WINDOWWIDTH - 120, WINDOWHEIGHT - 30)
     DISPLAYSURF.fill(BGCOLOR)
     pygame.draw.rect(DISPLAYSURF, BORDERCOLOR, (0, 0, 0, 0), 4)
     DISPLAYSURF.blit(exit_s, exit_r)
@@ -61,7 +58,7 @@ def main():
                 mouse_pos = event.pos
                 if LEVEL_11.collidepoint(mouse_pos):
                     boardwidth = 3
-                    boardwidth = 3
+                    boardheight = 3
                     xmargin = int((WINDOWWIDTH - (TILESIZE * boardwidth + (boardwidth - 1))) / 2)
                     ymargin = int((WINDOWHEIGHT - (TILESIZE * boardheight + (boardheight - 1))) / 2)
                     pygame.display.flip()
@@ -92,12 +89,13 @@ def main():
         pygame.display.update()
         FPSCLOCK.tick(FPS)
 
-
 def game():
     mainBoard, solutionSeq = generateNewPuzzle(80)
     SOLVEDBOARD = getStartingBoard()
     allMoves = [] # список ходов
-
+    reset_surf, reset_rect = makeText('Сброс', TEXTCOLOR, TILECOLOR, WINDOWWIDTH - 120, WINDOWHEIGHT - 90)
+    new_surf, new_rect = makeText('Новая игра', TEXTCOLOR, TILECOLOR, WINDOWWIDTH - 120, WINDOWHEIGHT - 60)
+    solve_surf, solve_rect = makeText('Решение', TEXTCOLOR, TILECOLOR, WINDOWWIDTH - 120, WINDOWHEIGHT - 30)
     while True:
         slideTo = None
         msg = 'Нажмите на плитку или клавиши со стрелками'
@@ -111,13 +109,13 @@ def game():
 
                 if (spotx, spoty) == (None, None):
                     # нажал ли пользователь на кнопку выбора
-                    if RESET_RECT.collidepoint(event.pos):
+                    if reset_rect.collidepoint(event.pos):
                         resetAnimation(mainBoard, allMoves)
                         allMoves = []
-                    elif NEW_RECT.collidepoint(event.pos):
+                    elif new_rect.collidepoint(event.pos):
                         mainBoard, solutionSeq = generateNewPuzzle(80)
                         allMoves = []
-                    elif SOLVE_RECT.collidepoint(event.pos):
+                    elif solve_rect.collidepoint(event.pos):
                         resetAnimation(mainBoard, solutionSeq + allMoves)
                         allMoves = []
                 else:
@@ -257,6 +255,9 @@ def makeText(text, color, bgcolor, top, left):
 
 
 def drawBoard(board, message):
+    reset_surf, reset_rect = makeText('Сброс', TEXTCOLOR, TILECOLOR, WINDOWWIDTH - 120, WINDOWHEIGHT - 90)
+    new_surf, new_rect = makeText('Новая игра', TEXTCOLOR, TILECOLOR, WINDOWWIDTH - 120, WINDOWHEIGHT - 60)
+    solve_surf, solve_rect = makeText('Решение', TEXTCOLOR, TILECOLOR, WINDOWWIDTH - 120, WINDOWHEIGHT - 30)
     DISPLAYSURF.fill(BGCOLOR)
     if message:
         textSurf, textRect = makeText(message, MESSAGECOLOR, BGCOLOR, 5, 5)
@@ -272,9 +273,9 @@ def drawBoard(board, message):
     height = boardheight * TILESIZE
     pygame.draw.rect(DISPLAYSURF, BORDERCOLOR, (left - 5, top - 5, width + 11, height + 11), 4)
 
-    DISPLAYSURF.blit(RESET_SURF, RESET_RECT)
-    DISPLAYSURF.blit(NEW_SURF, NEW_RECT)
-    DISPLAYSURF.blit(SOLVE_SURF, SOLVE_RECT)
+    DISPLAYSURF.blit(reset_surf, reset_rect)
+    DISPLAYSURF.blit(new_surf, new_rect)
+    DISPLAYSURF.blit(solve_surf, solve_rect)
 
 
 def slideAnimation(board, direction, message, animationSpeed):
@@ -345,6 +346,5 @@ def resetAnimation(board, allMoves):
         slideAnimation(board, oppositeMove, '', animationSpeed=int(TILESIZE / 2))
         makeMove(board, oppositeMove)
 
-
 if __name__ == '__main__':
-    main()
+     main()
